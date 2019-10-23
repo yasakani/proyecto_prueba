@@ -4,3 +4,179 @@
 	echo info();
 	var $i;
 ?>
+
+
+<template>
+  <div class="solicitud-viaje-nueva">
+    <h2>Generar solicitud de viaje</h2>
+    <ul v-if="errors && errors.length">
+      <li v-for="error of errors" v-bind:key="error.id">
+        {{ error.message }}
+      </li>
+    </ul>
+    <v-form v-model="valid" lazy-validation ref="form">
+      <v-card class="mx-auto" :disabled="disabledForm" :loading="disabledForm">
+        <v-container>
+          <v-row>
+            <v-col cols="12" md="12">
+              <v-textarea
+                v-model="solicitudViaje.motivo"
+                counter
+                label="Motivo del viaje"
+                :rules="motivo_rules"
+                required
+              ></v-textarea>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-date-picker
+                v-model="fechas_viaje"
+                range
+                full-width
+                locale="es-mx"
+                selected-items-text="Fechas seleccionadas"
+              ></v-date-picker>
+              <v-text-field
+                class="my-6"
+                v-model="fechas_viaje[0]"
+                label="Fecha de inicio"
+                prepend-icon="mdi-calendar"
+                required
+                readonly
+                :rules="fecha_inicio_rules"
+              ></v-text-field>
+              <v-text-field
+                class="my-6"
+                v-model="fechas_viaje[1]"
+                label="Fecha de regreso"
+                prepend-icon="mdi-calendar"
+                readonly
+                required
+                :rules="fecha_regreso_rules"
+              >
+              </v-text-field>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12" md="12">
+              <v-checkbox
+                v-model="solicitudViaje.es_internacional"
+                label="Es un viaje internacional"
+              ></v-checkbox>
+            </v-col>
+          </v-row>
+        </v-container>
+        <v-card-actions>
+          <v-btn color="light-blue" dark @click="sendForm"
+            >Generar solicitud</v-btn
+          >
+          <v-btn color="red" dark route to="/solicitudes-viaje">Cancelar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-form>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "SolicitudViajeNueva",
+  data: () => ({
+    solicitudViaje: {
+      id_empleado: 1,
+      motivo: "",
+      es_internacional: false,
+      inicio_viaje: "",
+      regreso_viaje: ""
+    },
+    motivo_rules: [
+      v => !!v || "El motivo de viaje es requerido",
+      v => v.length <= 200 || "Max 200 caracteres"
+    ],
+    fecha_inicio_rules: [v => !!v || "Debes especificar una fecha de inicio"],
+    fecha_regreso_rules: [v => !!v || "Debes especificar una fecha de regreso"],
+    fechas_viaje: ["", ""],
+    valid: true,
+    disabledForm: false,
+    errors: []
+  }),
+  computed: {
+    validateTravelDates() {
+      return [
+        () =>
+          this.fechas_viaje[0].length === 0 ||
+          "Se requiere una fecha de inicio",
+        () =>
+          this.fechas_viaje[1].length === 0 ||
+          "Se requiere una fecha de regreso"
+      ];
+    },
+    minDateAllowed() {
+      return "ok";
+    }
+  },
+  methods: {
+    sendForm: function() {
+      this.disabledForm = true;
+      if (this.$refs.form.validate()) {
+        this.solicitudViaje.inicio_viaje = this.fechas_viaje[0];
+        this.solicitudViaje.regreso_viaje = this.fechas_viaje[1];
+
+        this.$http
+          .post("http://localhost/api/solicitudes-viaje", this.solicitudViaje)
+          .then(response => {
+            this.$router.push({
+              name: "solicitud-viaje-detalles",
+              params: { id: response.data.id }
+            });
+          })
+          .catch(error => {
+            this.errors.push(error);
+            this.disabledForm = false;
+          });
+      } else {
+        this.disabledForm = false;
+      }
+    }
+  }
+};
+</script>
+
+<style>
+.custom-loader {
+  animation: loader 1s infinite;
+  display: flex;
+}
+@-moz-keyframes loader {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@-webkit-keyframes loader {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@-o-keyframes loader {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes loader {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>
