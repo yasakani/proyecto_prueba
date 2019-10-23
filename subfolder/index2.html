@@ -5,12 +5,18 @@
 	var $i;
 ?>
 
+<<<<<<< HEAD
 <p2>Sigo trabajndo</p2>
 <p3>Mas trabajo</p3>
+h1>ESTE ES TOTALMENTE DIFERENTE</h1>
 
+<h2 class="title font-weight-regular">Detalles de la solicitud de viaje</h2>
+	trabajo-paralelo
 <template>
   <div class="solicitud-viaje-nueva">
     <h2>Generar solicitud de viaje</h2>
+<template>
+  <div class="solicitud-viaje-detalles">
     <ul v-if="errors && errors.length">
       <li v-for="error of errors" v-bind:key="error.id">
         {{ error.message }}
@@ -77,6 +83,30 @@
         </v-card-actions>
       </v-card>
     </v-form>
+
+    <v-banner single-line>
+      <v-icon slot="icon" color="primary" size="33">
+        mdi-wallet-travel
+      </v-icon>
+      Desde el {{ solicitudDeViaje.inicio_viaje }} <v-icon>mdi-ray-start-arrow</v-icon> Hasta el {{ solicitudDeViaje.regreso_viaje }}
+    </v-banner>
+    <!--v-card class="mx-auto">
+      <v-list three-line>
+        <v-list-item-content>
+          <div class="overline mb-4">SOLICITUD DE VIAJE</div>
+          <v-list-item-title class="headline mb-1"
+            >Viaje del {{ solicitudDeViaje.inicio_viaje }} al
+            {{ solicitudDeViaje.regreso_viaje }}</v-list-item-title
+          >
+          <v-list-item-subtitle
+            v-text="solicitudDeViaje.motivo"
+          ></v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list>
+      <v-card-actions>
+        <v-btn>Solicitar anticipo</v-btn>
+      </v-card-actions>
+    </v-card-->
   </div>
 </template>
 
@@ -140,6 +170,26 @@ export default {
         this.disabledForm = false;
       }
     }
+  name: "SolicitudViajeDetalles",
+  data: () => ({
+    solicitudDeViaje: {},
+    errors: []
+  }),
+  computed: {},
+  methods: {},
+  created() {
+    let endpoint =
+      "http://localhost/api/solicitudes-viaje/" + this.$route.params.id;
+    this.$http
+      .get(endpoint)
+      .then(response => {
+        this.solicitudDeViaje = response.data;
+      })
+      .catch(error => {
+        this.errors.push(error);
+      })
+      .finally(() => (this.loading_flag = false));
+	  trabajo-paralelo
   }
 };
 </script>
